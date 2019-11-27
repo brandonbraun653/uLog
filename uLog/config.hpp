@@ -1,0 +1,22 @@
+/********************************************************************************
+ *  File Name:
+ *    config.hpp
+ *
+ *  Description:
+ *    Configuration options for uLog
+ *
+ *  2019 | Brandon Braun | brandonbraun653@gmail.com
+ ********************************************************************************/
+
+#pragma once
+#ifndef MICRO_LOGGER_CONFIGURATION_HPP
+#define MICRO_LOGGER_CONFIGURATION_HPP
+
+/**
+ *  The max number of sinks that are allowed to be registered with 
+ *  the backend. This will directly impact the memory usage and log
+ *  performance.
+ */
+#define ULOG_MAX_REGISTERABLE_SINKS   ( 10u )
+
+#endif  /* MICRO_LOGGER_CONFIGURATION_HPP */
