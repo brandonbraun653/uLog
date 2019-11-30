@@ -35,6 +35,24 @@ namespace uLog
 
     virtual ResultType disable() = 0;
     
+    /**
+     *  Sets the minimum log level threshold. This level, plus any higher priority 
+     *  levels, will be logged with the sink. 
+     *
+     *  @code
+     *    // This will log every message that arrives
+     *    setLogLevel( LogLevelType::TRACE );
+     *
+     *    // This will log only fatal messages (highest priority)
+     *    setLogLevel( LogLevelType::FATAL );
+     *
+     *    // This will log INFO, WARN, ERROR, & FATAL messages
+     *    setLogLevel( LogLevelType::INFO );
+     *  @endcode
+     *
+     *  @param[in]  level   The minimum log level for this sink
+     *  @return ResultType
+     */
     virtual ResultType setLogLevel( const LogLevelType level ) = 0;
 
     virtual LogLevelType getLogLevel() = 0;

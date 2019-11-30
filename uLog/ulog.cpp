@@ -10,9 +10,10 @@
 
 /* C++ Includes */
 #include <array>
-#include <atomic>
 #include <cstdint>
 #include <limits>
+#include <string>
+#include <stdarg.h>
 
 /* uLog Includes */
 #include <uLog/config.hpp>
@@ -20,25 +21,19 @@
 #include <uLog/types.hpp>
 #include <uLog/ulog.hpp>
 
-#define FLAG_LOCK( x ) ( !x.test_and_set( std::memory_order_acquire ) )
-#define FLAG_RELEASE( x ) ( x.clear( std::memory_order_release ) )
+#if defined( WIN32 ) || defined( WIN64 )
+std::atomic_flag threadLock = ATOMIC_FLAG_INIT;
+#elif defined( USING_FREERTOS )
+SemaphoreHandle_t threadLock = xSemaphoreCreateRecursiveMutex();
+#endif
 
 namespace uLog
 {
   static bool uLogInitialized = false;
-  static std::atomic_flag threadLock = ATOMIC_FLAG_INIT;
   static LogLevelType globalLogLevel = LogLevelType::LOG_LEVEL_MIN;
   static std::array<SinkType, ULOG_MAX_REGISTERABLE_SINKS> sinkRegistry;
 
-  /**
-   *  Common entry point into the logging system for all log levels.
-   *
-   *  @param[in]  level     The level to be logged at
-   *  @param[in]  message   The message to be logged
-   *  @param[in]  length    How many bytes are contained in the message
-   *  @return ResultType
-   */
-  static ResultType commonLogger( const LogLevelType level, const void *const message, const size_t length );
+  std::array<char, ULOG_MAX_SNPRINTF_BUFFER_LENGTH> printfBuffer;
 
   /**
    *  Looks up the registry index associated with a particular sink handle
@@ -74,20 +69,42 @@ namespace uLog
   SinkHandleType registerSink( SinkType &sink )
   {
     SinkHandleType temp = nullptr;
+    constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
+
+    size_t nullIndex      = invalidIndex; /* First index that doesn't have a sink registered */
+    bool sinkIsRegistered = false;        /* Indicates if the sink we are registering already exists */
+
 
     if ( FLAG_LOCK( threadLock ) )
     {
       /*------------------------------------------------
-      Find the first empty slot in the registry and assign the sink
+      Check if the sink already is registered as well as
+      an empty slot to insert the new sink.
       ------------------------------------------------*/
       for ( size_t i = 0; i < sinkRegistry.size(); i++ )
       {
-        if ( ( sinkRegistry[ i ] == nullptr ) && ( sink->open() == ResultType::RESULT_SUCCESS ) )
+        /* Did we find the first location that is free? */
+        if ( ( nullIndex == invalidIndex ) && ( sinkRegistry[ i ] == nullptr ) )
         {
-          sinkRegistry[ i ] = sink;
-          temp              = &sinkRegistry[ i ];
+          nullIndex = i;
+        }
+
+        /* Does the sink already exist in the registry? */
+        if ( sinkRegistry[ i ] == sink )
+        {
+          sinkIsRegistered = true;
           break;
         }
+      }
+
+      /*------------------------------------------------
+      Perform the registration
+      ------------------------------------------------*/
+      if ( !sinkIsRegistered && ( sink->open() == ResultType::RESULT_SUCCESS ) )
+      {
+        /* OOB access protected by the for() loop above */
+        sinkRegistry[ nullIndex ] = sink;
+        temp                      = &sinkRegistry[ nullIndex ];
       }
 
       FLAG_RELEASE( threadLock );
@@ -238,36 +255,6 @@ namespace uLog
     return result;
   }
 
-  ResultType trace( const void *const message, const size_t length )
-  {
-    return commonLogger( LogLevelType::LOG_LEVEL_TRACE, message, length );
-  }
-
-  ResultType debug( const void *const message, const size_t length )
-  {
-    return commonLogger( LogLevelType::LOG_LEVEL_DEBUG, message, length );
-  }
-
-  ResultType info( const void *const message, const size_t length )
-  {
-    return commonLogger( LogLevelType::LOG_LEVEL_INFO, message, length );
-  }
-
-  ResultType warn( const void *const message, const size_t length )
-  {
-    return commonLogger( LogLevelType::LOG_LEVEL_WARN, message, length );
-  }
-
-  ResultType error( const void *const message, const size_t length )
-  {
-    return commonLogger( LogLevelType::LOG_LEVEL_ERROR, message, length );
-  }
-
-  ResultType fatal( const void *const message, const size_t length )
-  {
-    return commonLogger( LogLevelType::LOG_LEVEL_FATAL, message, length );
-  }
-
   size_t getSinkOffsetIndex( const SinkHandleType sinkHandle )
   {
     /*------------------------------------------------
@@ -294,7 +281,7 @@ namespace uLog
     return index;
   }
 
-  ResultType commonLogger( const LogLevelType level, const void *const message, const size_t length )
+  ResultType log( const LogLevelType level, const void *const message, const size_t length )
   {
     /*------------------------------------------------
     Input boundary checking
@@ -324,5 +311,6 @@ namespace uLog
     FLAG_RELEASE( threadLock );
     return ResultType::RESULT_SUCCESS;
   }
+
 
 }    // namespace uLog

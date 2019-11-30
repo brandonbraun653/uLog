@@ -13,13 +13,41 @@
 #define MICRO_LOGGER_HPP
 
 /* C++ Includes */
+#include <array>
 #include <cstdlib>
+#include <cstring>
+#include <string>
 
 /* uLog Includes */
+#include <uLog/config.hpp>
 #include <uLog/types.hpp>
 
+/*------------------------------------------------
+TODO: Unpolute the namespace
+------------------------------------------------*/
+
+#if defined( WIN32 ) || defined( WIN64 )
+#include <atomic>
+#define FLAG_LOCK( x ) ( !x.test_and_set( std::memory_order_acquire ) )
+#define FLAG_RELEASE( x ) ( x.clear( std::memory_order_release ) )
+
+extern std::atomic_flag threadLock;
+
+#elif defined( USING_FREERTOS )
+#include "FreeRTOS.h"
+#include "semphr.h"
+
+#define FLAG_LOCK( x ) ( ( xSemaphoreTakeRecursive( x, portMAX_DELAY ) == pdPASS ) )
+#define FLAG_RELEASE( x ) ( ( xSemaphoreGiveRecursive( x ) == pdPASS ) )
+
+extern SemaphoreHandle_t threadLock;
+
+#endif
+
 namespace uLog
-{  
+{
+  extern std::array<char, ULOG_MAX_SNPRINTF_BUFFER_LENGTH> printfBuffer;
+
   /**
    *  Initializes the backend driver
    *  
@@ -84,59 +112,22 @@ namespace uLog
    */
   ResultType flushSink( SinkHandleType sink );
 
-  /**
-   *  Logs a trace level message to all registered sinks 
-   *  
-   *  @param[in]  message   The message to be logged
-   *  @param[in]  length    How long the message is in bytes
-   *  @return ResultType
-   */
-  ResultType trace( const void *const message, const size_t length );
-  
-  /**
-   *  Logs a debug level message to all registered sinks 
-   *  
-   *  @param[in]  message   The message to be logged
-   *  @param[in]  length    How long the message is in bytes
-   *  @return ResultType
-   */
-  ResultType debug( const void *const message, const size_t length );
-  
-  /**
-   *  Logs a info level message to all registered sinks 
-   *  
-   *  @param[in]  message   The message to be logged
-   *  @param[in]  length    How long the message is in bytes
-   *  @return ResultType
-   */
-  ResultType info( const void *const message, const size_t length );
-  
-  /**
-   *  Logs a warn level message to all registered sinks 
-   *  
-   *  @param[in]  message   The message to be logged
-   *  @param[in]  length    How long the message is in bytes
-   *  @return ResultType
-   */
-  ResultType warn( const void *const message, const size_t length );
-  
-  /**
-   *  Logs a error level message to all registered sinks 
-   *  
-   *  @param[in]  message   The message to be logged
-   *  @param[in]  length    How long the message is in bytes
-   *  @return ResultType
-   */
-  ResultType error( const void *const message, const size_t length );
-  
-  /**
-   *  Logs a fatal level message to all registered sinks 
-   *  
-   *  @param[in]  message   The message to be logged
-   *  @param[in]  length    How long the message is in bytes
-   *  @return ResultType
-   */
-  ResultType fatal( const void *const message, const size_t length );
+  ResultType log( const LogLevelType lvl, const void *const msg, const size_t length );
+
+  template<typename... Args>
+  ResultType flog( const LogLevelType lvl, const char *str, Args const &... args )
+  {
+    auto result = ResultType::RESULT_SUCCESS;
+
+    if ( FLAG_LOCK( threadLock ) )
+    {
+      snprintf( printfBuffer.data(), printfBuffer.size(), str, args... );
+      result = log( lvl, printfBuffer.data(), strlen( printfBuffer.data() ) );
+      FLAG_RELEASE( threadLock );
+    }
+
+    return result;
+  }
 }
 
 #endif  /* MICRO_LOGGER_HPP */

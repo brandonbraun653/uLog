@@ -19,4 +19,10 @@
  */
 #define ULOG_MAX_REGISTERABLE_SINKS   ( 10u )
 
+/**
+ *  Defines the max number of characters used for an internal buffer to
+ *  format messages into.
+ */
+#define ULOG_MAX_SNPRINTF_BUFFER_LENGTH ( 256u )
+
 #endif  /* MICRO_LOGGER_CONFIGURATION_HPP */

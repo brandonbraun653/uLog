@@ -8,6 +8,8 @@
  *  2019 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
+#if defined( WIN32 ) || defined( WIN64 )
+
 /* C++ Includes */
 #include <iostream>
 #include <string>
@@ -86,3 +88,5 @@ namespace uLog
     return ResultType::RESULT_SUCCESS;
   }
 }    // namespace uLog
+
+#endif  /* WIN32 || WIN64 */
