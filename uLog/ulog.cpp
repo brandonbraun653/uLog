@@ -30,7 +30,7 @@ SemaphoreHandle_t threadLock = xSemaphoreCreateRecursiveMutex();
 namespace uLog
 {
   static bool uLogInitialized = false;
-  static LogLevelType globalLogLevel = LogLevelType::LOG_LEVEL_MIN;
+  static Level globalLogLevel = Level::LVL_MIN;
   static std::array<SinkType, ULOG_MAX_REGISTERABLE_SINKS> sinkRegistry;
 
   std::array<char, ULOG_MAX_SNPRINTF_BUFFER_LENGTH> printfBuffer;
@@ -53,17 +53,17 @@ namespace uLog
     }
   }
 
-  ResultType setGlobalLogLevel( const LogLevelType level )
+  Result setGlobalLogLevel( const Level level )
   {
     if ( FLAG_LOCK( threadLock ) )
     {
       globalLogLevel = level;
       FLAG_RELEASE( threadLock );
       
-      return ResultType::RESULT_SUCCESS;
+      return Result::RESULT_SUCCESS;
     }
 
-    return ResultType::RESULT_FAIL;
+    return Result::RESULT_FAIL;
   }
 
   SinkHandleType registerSink( SinkType &sink )
@@ -100,7 +100,7 @@ namespace uLog
       /*------------------------------------------------
       Perform the registration
       ------------------------------------------------*/
-      if ( !sinkIsRegistered && ( sink->open() == ResultType::RESULT_SUCCESS ) )
+      if ( !sinkIsRegistered && ( sink->open() == Result::RESULT_SUCCESS ) )
       {
         /* OOB access protected by the for() loop above */
         sinkRegistry[ nullIndex ] = sink;
@@ -113,9 +113,9 @@ namespace uLog
     return temp;
   }
 
-  ResultType removeSink( SinkHandleType sink )
+  Result removeSink( SinkHandleType sink )
   {
-    ResultType result = ResultType::RESULT_FAIL;
+    Result result = Result::RESULT_FAIL;
 
     if ( FLAG_LOCK( threadLock ) )
     {
@@ -139,22 +139,22 @@ namespace uLog
           }
         }
 
-        result = ResultType::RESULT_SUCCESS;
+        result = Result::RESULT_SUCCESS;
       }
 
       FLAG_RELEASE( threadLock );
     }
     else
     {
-      result = ResultType::RESULT_LOCKED;
+      result = Result::RESULT_LOCKED;
     }
 
     return result;
   }
 
-  ResultType enableSink( SinkHandleType sink )
+  Result enableSink( SinkHandleType sink )
   {
-    ResultType result = ResultType::RESULT_FAIL;
+    Result result = Result::RESULT_FAIL;
 
     if ( FLAG_LOCK( threadLock ) )
     {
@@ -174,22 +174,22 @@ namespace uLog
           
         }
 
-        result = ResultType::RESULT_SUCCESS;
+        result = Result::RESULT_SUCCESS;
       }
 
       FLAG_RELEASE( threadLock );
     }
     else
     {
-      result = ResultType::RESULT_LOCKED;
+      result = Result::RESULT_LOCKED;
     }
 
     return result;
   }
 
-  ResultType disableSink( SinkHandleType sink )
+  Result disableSink( SinkHandleType sink )
   {
-    ResultType result = ResultType::RESULT_FAIL;
+    Result result = Result::RESULT_FAIL;
 
     if ( FLAG_LOCK( threadLock ) )
     {
@@ -208,22 +208,22 @@ namespace uLog
           }
         }
 
-        result = ResultType::RESULT_SUCCESS;
+        result = Result::RESULT_SUCCESS;
       }
 
       FLAG_RELEASE( threadLock );
     }
     else
     {
-      result = ResultType::RESULT_LOCKED;
+      result = Result::RESULT_LOCKED;
     }
 
     return result;
   }
 
-  ResultType flushSink( SinkHandleType sink )
+  Result flushSink( SinkHandleType sink )
   {
-    ResultType result = ResultType::RESULT_FAIL;
+    Result result = Result::RESULT_FAIL;
 
     if ( FLAG_LOCK( threadLock ) )
     {
@@ -242,14 +242,14 @@ namespace uLog
           }
         }
 
-        result = ResultType::RESULT_SUCCESS;
+        result = Result::RESULT_SUCCESS;
       }
 
       FLAG_RELEASE( threadLock );
     }
     else
     {
-      result = ResultType::RESULT_LOCKED;
+      result = Result::RESULT_LOCKED;
     }
 
     return result;
@@ -281,19 +281,19 @@ namespace uLog
     return index;
   }
 
-  ResultType log( const LogLevelType level, const void *const message, const size_t length )
+  Result log( const Level level, const void *const message, const size_t length )
   {
     /*------------------------------------------------
     Input boundary checking
     ------------------------------------------------*/
     if ( !FLAG_LOCK( threadLock ) )
     {
-      return ResultType::RESULT_LOCKED;
+      return Result::RESULT_LOCKED;
     }
     else if ( ( level < globalLogLevel ) || !message || !length )
     {
       FLAG_RELEASE( threadLock );
-      return ResultType::RESULT_FAIL;
+      return Result::RESULT_FAIL;
     }
 
     /*------------------------------------------------
@@ -309,7 +309,7 @@ namespace uLog
     }
 
     FLAG_RELEASE( threadLock );
-    return ResultType::RESULT_SUCCESS;
+    return Result::RESULT_SUCCESS;
   }
 
 

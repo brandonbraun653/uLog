@@ -62,7 +62,7 @@ namespace uLog
    *  @param[in]  level      The global log level to be set
    *  @return SinkHandleType
    */
-  ResultType setGlobalLogLevel( const LogLevelType level );
+  Result setGlobalLogLevel( const Level level );
 
   /**
    *  Registers a sink with the back end driver 
@@ -80,7 +80,7 @@ namespace uLog
    *  @param[in]  sink      The sink that should be removed
    *  @return ResultType
    */
-  ResultType removeSink( SinkHandleType sink );
+  Result removeSink( SinkHandleType sink );
 
   /**
    *  Enables the associated sink. 
@@ -90,7 +90,7 @@ namespace uLog
    *  @param[in]  sink      The sink that should be enabled
    *  @return ResultType
    */
-  ResultType enableSink( SinkHandleType sink );
+  Result enableSink( SinkHandleType sink );
 
   /**
    *  Disables the associated sink from being able to log
@@ -100,7 +100,7 @@ namespace uLog
    *  @param[in]  sink      The sink that should be disabled
    *  @return ResultType
    */
-  ResultType disableSink( SinkHandleType sink );
+  Result disableSink( SinkHandleType sink );
 
   /**
    *  Flushes the associated sink. 
@@ -110,14 +110,14 @@ namespace uLog
    *  @param[in]  sink      The sink that should be flushed
    *  @return ResultType
    */
-  ResultType flushSink( SinkHandleType sink );
+  Result flushSink( SinkHandleType sink );
 
-  ResultType log( const LogLevelType lvl, const void *const msg, const size_t length );
+  Result log( const Level lvl, const void *const msg, const size_t length );
 
   template<typename... Args>
-  ResultType flog( const LogLevelType lvl, const char *str, Args const &... args )
+  Result flog( const Level lvl, const char *str, Args const &... args )
   {
-    auto result = ResultType::RESULT_SUCCESS;
+    auto result = Result::RESULT_SUCCESS;
 
     if ( FLAG_LOCK( threadLock ) )
     {

@@ -25,15 +25,15 @@ namespace uLog
   public:
     virtual ~SinkInterface() = default;
 
-    virtual ResultType open() = 0;
+    virtual Result open() = 0;
 
-    virtual ResultType close() = 0;
+    virtual Result close() = 0;
 
-    virtual ResultType flush() = 0;
+    virtual Result flush() = 0;
 
-    virtual ResultType enable() = 0;
+    virtual Result enable() = 0;
 
-    virtual ResultType disable() = 0;
+    virtual Result disable() = 0;
     
     /**
      *  Sets the minimum log level threshold. This level, plus any higher priority 
@@ -53,9 +53,9 @@ namespace uLog
      *  @param[in]  level   The minimum log level for this sink
      *  @return ResultType
      */
-    virtual ResultType setLogLevel( const LogLevelType level ) = 0;
+    virtual Result setLogLevel( const Level level ) = 0;
 
-    virtual LogLevelType getLogLevel() = 0;
+    virtual Level getLogLevel() = 0;
 
     /**
      *  Provides the core functionality of the sink by logging messages.
@@ -67,7 +67,7 @@ namespace uLog
      *  @param[in]  length    How large the message is in bytes
      *  @return ResultType    Whether or not the logging action succeeded
      */
-    virtual ResultType log( const LogLevelType level, const void *const message, const size_t length ) = 0;
+    virtual Result log( const Level level, const void *const message, const size_t length ) = 0;
   };
 
 }

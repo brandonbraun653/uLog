@@ -18,7 +18,7 @@
 
 namespace uLog
 {
-  enum class ResultType : size_t 
+  enum class Result : size_t 
   {
     RESULT_SUCCESS,
     RESULT_FAIL,
@@ -32,17 +32,17 @@ namespace uLog
    *  The supported logging level types for all log sinks. An increasing numerical
    *  value corresponds with an increasing priority.
    */
-  enum class LogLevelType : size_t
+  enum class Level : size_t
   {
-    LOG_LEVEL_TRACE,
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_WARN,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_FATAL,
+    LVL_TRACE,
+    LVL_DEBUG,
+    LVL_INFO,
+    LVL_WARN,
+    LVL_ERROR,
+    LVL_FATAL,
 
-    LOG_LEVEL_MIN = LOG_LEVEL_TRACE,
-    LOG_LEVEL_MAX = LOG_LEVEL_FATAL
+    LVL_MIN = LVL_TRACE,
+    LVL_MAX = LVL_FATAL
   };
 
   class SinkInterface;

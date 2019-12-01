@@ -1,16 +1,22 @@
 /********************************************************************************
- *  File Name:
- *    sink_cout.hpp
+ *   File Name:
+ *    sink_vgdb_semihosting.hpp
  *
- *  Description:
- *    Implements a sink for std::cout
+ *   Description:
+ *    Visual GDB ARM Semihosting Sink
  *
- *  2019 | Brandon Braun | brandonbraun653@gmail.com
+ *   2019 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
-#ifndef MICRO_LOGGER_SINK_COUT_HPP
-#define MICRO_LOGGER_SINK_COUT_HPP
+#ifndef MICRO_LOGGER_VISUAL_GDB_SEMIHOSTING_SINK_HPP
+#define MICRO_LOGGER_VISUAL_GDB_SEMIHOSTING_SINK_HPP
+
+/*------------------------------------------------
+Visual GDB framework file that supports Semihosting
+------------------------------------------------*/
+#if __has_include( "FastSemihosting.cpp" )
+#define MICRO_LOGGER_HAS_VGDB_SEMIHOSTING   ( 1 )
 
 /* C++ Includes */
 #include <cstdlib>
@@ -21,10 +27,11 @@
 
 namespace uLog
 {
-  class CoutSink : public SinkInterface
-  {public:
-    CoutSink();
-    ~CoutSink();
+  class VGDBSemihostingSink : public SinkInterface
+  {
+  public:
+    VGDBSemihostingSink();
+    ~VGDBSemihostingSink();
 
     Result open() final override;
 
@@ -45,8 +52,10 @@ namespace uLog
   private:
     bool enabled;
     Level logLevel;
-  
   };
+
 }    // namespace uLog
 
-#endif    // !MICRO_LOGGER_SINK_COUT_HPP
+#endif /* FastSemihosting.cpp */
+
+#endif /* !MICRO_LOGGER_VISUAL_GDB_SEMIHOSTING_SINK_HPP */

@@ -22,60 +22,60 @@ namespace uLog
   CoutSink::CoutSink()
   { 
     enabled = false;
-    logLevel = LogLevelType::LOG_LEVEL_MIN;
+    logLevel = Level::LVL_MIN;
   }
 
   CoutSink::~CoutSink()
   {
   }
 
-  ResultType CoutSink::open()
+  Result CoutSink::open()
   {
-    return ResultType::RESULT_SUCCESS;
+    return Result::RESULT_SUCCESS;
   }
 
-  ResultType CoutSink::close()
+  Result CoutSink::close()
   {
-    return ResultType::RESULT_SUCCESS;
+    return Result::RESULT_SUCCESS;
   }
 
-  ResultType CoutSink::flush()
+  Result CoutSink::flush()
   {
     std::cout << " " << std::flush;
-    return ResultType::RESULT_SUCCESS;
+    return Result::RESULT_SUCCESS;
   }
 
-  ResultType CoutSink::enable()
+  Result CoutSink::enable()
   {
     enabled = true;
-    return ResultType::RESULT_SUCCESS;
+    return Result::RESULT_SUCCESS;
   }
 
-  ResultType CoutSink::disable()
+  Result CoutSink::disable()
   {
     enabled = false;
-    return ResultType::RESULT_SUCCESS;
+    return Result::RESULT_SUCCESS;
   }
 
-  ResultType CoutSink::setLogLevel( const LogLevelType level )
+  Result CoutSink::setLogLevel( const Level level )
   {
     logLevel = level;
-    return ResultType::RESULT_SUCCESS;
+    return Result::RESULT_SUCCESS;
   }
 
-  LogLevelType CoutSink::getLogLevel()
+  Level CoutSink::getLogLevel()
   {
     return logLevel;
   }
 
-  ResultType CoutSink::log( const LogLevelType level, const void *const message, const size_t length )
+  Result CoutSink::log( const Level level, const void *const message, const size_t length )
   {
     /*------------------------------------------------
     Check to see if we should even write
     ------------------------------------------------*/
     if (!enabled || ( level < logLevel ) || !message || !length)
     {
-      return ResultType::RESULT_FAIL;
+      return Result::RESULT_FAIL;
     }
 
     /*------------------------------------------------
@@ -85,7 +85,7 @@ namespace uLog
     coutBuffer.assign( reinterpret_cast<const char *const>( message ), length );
     std::cout << coutBuffer << std::flush;
 
-    return ResultType::RESULT_SUCCESS;
+    return Result::RESULT_SUCCESS;
   }
 }    // namespace uLog
 
