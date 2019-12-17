@@ -12,8 +12,8 @@
 #include <array>
 #include <cstdint>
 #include <limits>
+#include <mutex>
 #include <string>
-#include <stdarg.h>
 
 /* uLog Includes */
 #include <uLog/config.hpp>
@@ -22,7 +22,7 @@
 #include <uLog/ulog.hpp>
 
 #if defined( WIN32 ) || defined( WIN64 )
-std::atomic_flag threadLock = ATOMIC_FLAG_INIT;
+std::recursive_mutex threadLock;
 #elif defined( USING_FREERTOS )
 SemaphoreHandle_t threadLock = xSemaphoreCreateRecursiveMutex();
 #endif

@@ -27,11 +27,11 @@ TODO: Unpolute the namespace
 ------------------------------------------------*/
 
 #if defined( WIN32 ) || defined( WIN64 )
-#include <atomic>
-#define FLAG_LOCK( x ) ( !x.test_and_set( std::memory_order_acquire ) )
-#define FLAG_RELEASE( x ) ( x.clear( std::memory_order_release ) )
+#include <mutex>
+#define FLAG_LOCK( x ) ( x.try_lock() )
+#define FLAG_RELEASE( x ) ( x.unlock() )
 
-extern std::atomic_flag threadLock;
+extern std::recursive_mutex threadLock;
 
 #elif defined( USING_FREERTOS )
 #include "FreeRTOS.h"
