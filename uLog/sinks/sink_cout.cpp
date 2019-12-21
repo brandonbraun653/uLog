@@ -20,9 +20,7 @@
 namespace uLog
 {
   CoutSink::CoutSink()
-  { 
-    enabled = false;
-    logLevel = Level::LVL_MIN;
+  {
   }
 
   CoutSink::~CoutSink()
@@ -45,27 +43,9 @@ namespace uLog
     return Result::RESULT_SUCCESS;
   }
 
-  Result CoutSink::enable()
+  IOType CoutSink::getIOType()
   {
-    enabled = true;
-    return Result::RESULT_SUCCESS;
-  }
-
-  Result CoutSink::disable()
-  {
-    enabled = false;
-    return Result::RESULT_SUCCESS;
-  }
-
-  Result CoutSink::setLogLevel( const Level level )
-  {
-    logLevel = level;
-    return Result::RESULT_SUCCESS;
-  }
-
-  Level CoutSink::getLogLevel()
-  {
-    return logLevel;
+    return IOType::CONSOLE_SINK;
   }
 
   Result CoutSink::log( const Level level, const void *const message, const size_t length )
@@ -73,7 +53,7 @@ namespace uLog
     /*------------------------------------------------
     Check to see if we should even write
     ------------------------------------------------*/
-    if (!enabled || ( level < logLevel ) || !message || !length)
+    if (!isEnabled() || ( level < getLogLevel() ) || !message || !length)
     {
       return Result::RESULT_FAIL;
     }

@@ -13,16 +13,30 @@
 #define MICRO_LOGGER_SINK_INTERFACE_HPP
 
 /* C++ Includes */
+#include <array>
 #include <cstdint>
+#include <string_view>
+
+/* Chimera Includes */
+#include <Chimera/threading.hpp>
 
 /* uLog Includes */
+#include <uLog/config.hpp>
 #include <uLog/types.hpp>
 
 namespace uLog
 {
-  class SinkInterface
+  class SinkInterface : public Chimera::Threading::Lockable
   {
   public:
+    SinkInterface() : Chimera::Threading::Lockable()
+    {
+      mSinkEnabled  = false;
+      mLoggingLevel = Level::LVL_MAX;
+      mName         = "";
+      mLogBuffer.fill( 0 );
+    }
+
     virtual ~SinkInterface() = default;
 
     virtual Result open() = 0;
@@ -31,31 +45,7 @@ namespace uLog
 
     virtual Result flush() = 0;
 
-    virtual Result enable() = 0;
-
-    virtual Result disable() = 0;
-    
-    /**
-     *  Sets the minimum log level threshold. This level, plus any higher priority 
-     *  levels, will be logged with the sink. 
-     *
-     *  @code
-     *    // This will log every message that arrives
-     *    setLogLevel( LogLevelType::TRACE );
-     *
-     *    // This will log only fatal messages (highest priority)
-     *    setLogLevel( LogLevelType::FATAL );
-     *
-     *    // This will log INFO, WARN, ERROR, & FATAL messages
-     *    setLogLevel( LogLevelType::INFO );
-     *  @endcode
-     *
-     *  @param[in]  level   The minimum log level for this sink
-     *  @return ResultType
-     */
-    virtual Result setLogLevel( const Level level ) = 0;
-
-    virtual Level getLogLevel() = 0;
+    virtual IOType getIOType() = 0;
 
     /**
      *  Provides the core functionality of the sink by logging messages.
@@ -68,6 +58,113 @@ namespace uLog
      *  @return ResultType    Whether or not the logging action succeeded
      */
     virtual Result log( const Level level, const void *const message, const size_t length ) = 0;
+    
+    /**
+     *  Enables the sink so logs can be processed
+     */
+    void enable()
+    {
+      mSinkEnabled = true;
+    }
+
+    /**
+     *  Disables the sink so logs cannot be processed
+     */
+    void disable()
+    {
+      mSinkEnabled = false;
+    }
+
+    /**
+     *  Checks if the sink is enabled
+     *  @return bool
+     */
+    bool isEnabled()
+    {
+      return mSinkEnabled;
+    }
+
+    /**
+     *  Sets the minimum log level threshold. This level, plus any higher priority 
+     *  levels, will be logged with the sink. 
+     *
+     *  @param[in]  level   The minimum log level for this sink
+     *  @return ResultType
+     */
+    void setLogLevel( const Level level )
+    {
+      mLoggingLevel = level;
+    }
+
+    /** 
+     *  Gets the log level currently assigned to the sink
+     *
+     *  @return Level
+     */
+    Level getLogLevel()
+    {
+      return mLoggingLevel;
+    }
+
+    /**
+     *  Assigns a name to the sink
+     *
+     *  @warning  This naming should be unique
+     *
+     *  @param[in]  name    The name to be assigned
+     *  @return Result
+     */
+    Result setName( const std::string_view &name )
+    {
+      mName = name;
+      return Result::RESULT_SUCCESS;
+    }
+
+    /**
+     *  Gets the name of the sink
+     *
+     *  @return std::string_view
+     */
+    std::string_view getName()
+    {
+      return mName;
+    }
+
+    /**
+     *  
+     */
+    template<typename... Args>
+    Result flog( const Level lvl, const char *str, Args const &... args )
+    {
+      auto result = Result::RESULT_LOCKED;
+
+      if ( Chimera::Threading::LockGuard( *this ).lock() )
+      {
+        /*------------------------------------------------
+        Until custom formatters are available, simply dump the thread name in there
+        ------------------------------------------------*/
+        int bytesWritten = snprintf( mLogBuffer.data(), mLogBuffer.size(), "[%s] -- ", mName.data() );
+
+        if ( bytesWritten < 0 )
+        {
+          return Result::RESULT_FAIL;
+        }
+
+        /*------------------------------------------------
+        Attach the user's message, or what will fit anyways
+        ------------------------------------------------*/
+        snprintf( mLogBuffer.data() + bytesWritten, mLogBuffer.size() - bytesWritten, str, args... );
+        result = log( lvl, mLogBuffer.data(), strlen( mLogBuffer.data() ) );
+      }
+
+      return result;
+    }
+
+  private:
+    Level mLoggingLevel;
+    bool mSinkEnabled;
+    std::string_view mName;
+    std::array<char, ULOG_MAX_SNPRINTF_BUFFER_LENGTH> mLogBuffer;
   };
 
 }

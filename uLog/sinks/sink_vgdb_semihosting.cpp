@@ -73,6 +73,11 @@ namespace uLog
     return logLevel;
   }
 
+  IOType VGDBSemihostingSink::getIOType()
+  {
+    return IOType::VGDB_SINK;
+  }
+
   Result VGDBSemihostingSink::log( const Level level, const void *const message, const size_t length )
   {
     /*------------------------------------------------

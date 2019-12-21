@@ -22,32 +22,9 @@
 #include <uLog/config.hpp>
 #include <uLog/types.hpp>
 
-/*------------------------------------------------
-TODO: Unpolute the namespace
-------------------------------------------------*/
-
-#if defined( WIN32 ) || defined( WIN64 )
-#include <mutex>
-#define FLAG_LOCK( x ) ( x.try_lock() )
-#define FLAG_RELEASE( x ) ( x.unlock() )
-
-extern std::recursive_mutex threadLock;
-
-#elif defined( USING_FREERTOS )
-#include "FreeRTOS.h"
-#include "semphr.h"
-
-#define FLAG_LOCK( x ) ( ( xSemaphoreTakeRecursive( x, portMAX_DELAY ) == pdPASS ) )
-#define FLAG_RELEASE( x ) ( ( xSemaphoreGiveRecursive( x ) == pdPASS ) )
-
-extern SemaphoreHandle_t threadLock;
-
-#endif
 
 namespace uLog
 {
-  extern std::array<char, ULOG_MAX_SNPRINTF_BUFFER_LENGTH> printfBuffer;
-
   /**
    *  Initializes the backend driver
    *  
@@ -70,7 +47,7 @@ namespace uLog
    *  @param[in]  sink      The sink to be registered
    *  @return SinkHandleType
    */
-  SinkHandleType registerSink( SinkType &sink );
+  Result registerSink( SinkHandle &sink, const uLog::Config options = CFG_NONE );
 
   /**
    *  Removes the associated sink. 
@@ -80,54 +57,34 @@ namespace uLog
    *  @param[in]  sink      The sink that should be removed
    *  @return ResultType
    */
-  Result removeSink( SinkHandleType sink );
+  Result removeSink( SinkHandle &sink );
 
   /**
-   *  Enables the associated sink. 
-   *  
-   *  @note If nullptr is passed in, all sinks are enabled.
-   *  
-   *  @param[in]  sink      The sink that should be enabled
-   *  @return ResultType
+   *  Sets the default global logger instance
+   *
+   *  @param[in]  sink      The sink to become the root
+   *  @return Result
    */
-  Result enableSink( SinkHandleType sink );
+  Result setRootSink( SinkHandle &sink );
 
   /**
-   *  Disables the associated sink from being able to log
-   *  
-   *  @note If nullptr is passed in, all sinks are disabled.
-   *  
-   *  @param[in]  sink      The sink that should be disabled
-   *  @return ResultType
+   *  Gets the default global logger instance 
+   *
+   *  @return SinkHandle
    */
-  Result disableSink( SinkHandleType sink );
+  SinkHandle getRootSink();
 
   /**
-   *  Flushes the associated sink. 
-   *  
-   *  @note If nullptr is passed in, all sinks are flushed.
-   *  
-   *  @param[in]  sink      The sink that should be flushed
-   *  @return ResultType
+   *  Attempts to log to every registered sink. Each sink determines if the message
+   *  should be logged with them depending on the sink specific logging level.
+   *
+   *  @param[in]  lvl       The severity level of the message to be logged
+   *  @param[in]  msg       Raw byte message to be logged 
+   *  @param[in]  length    Length of the log message
+   *  @return Result
    */
-  Result flushSink( SinkHandleType sink );
-
   Result log( const Level lvl, const void *const msg, const size_t length );
 
-  template<typename... Args>
-  Result flog( const Level lvl, const char *str, Args const &... args )
-  {
-    auto result = Result::RESULT_SUCCESS;
-
-    if ( FLAG_LOCK( threadLock ) )
-    {
-      snprintf( printfBuffer.data(), printfBuffer.size(), str, args... );
-      result = log( lvl, printfBuffer.data(), strlen( printfBuffer.data() ) );
-      FLAG_RELEASE( threadLock );
-    }
-
-    return result;
-  }
 }
 
 #endif  /* MICRO_LOGGER_HPP */

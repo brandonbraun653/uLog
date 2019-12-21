@@ -47,6 +47,8 @@ namespace uLog
 
     Level getLogLevel() final override;
 
+    IOType getIOType() final override;
+
     Result log( const Level level, const void *const message, const size_t length ) final override;
 
   private:

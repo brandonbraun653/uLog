@@ -23,6 +23,7 @@ namespace uLog
     RESULT_SUCCESS,
     RESULT_FAIL,
     RESULT_FAIL_MSG_TOO_LONG,
+    RESULT_FAIL_BAD_SINK,
     RESULT_LOCKED,
     RESULT_FULL,
     RESULT_INVALID_LEVEL
@@ -45,10 +46,24 @@ namespace uLog
     LVL_MAX = LVL_FATAL
   };
 
+  enum Config : size_t
+  {
+    CFG_NONE = 0,
+    CFG_INITIALIZE_ALWAYS               = ( 1u << 0 ), /**< Like the name says, always initialize */
+    CFG_INITIALIZE_IFF_SINK_UNIQUE_TYPE = ( 1u << 1 )  /**< Only initialize the sink if it's the only one of its kind */
+  };
+
+  enum class IOType : size_t
+  {
+    CONSOLE_SINK,
+    FILE_SINK,
+    SERIAL_SINK,
+    VGDB_SINK
+  };
+
   class SinkInterface;
 
-  using SinkHandleType = void *;
-  using SinkType = std::shared_ptr<SinkInterface>;
+  using SinkHandle = std::shared_ptr<SinkInterface>;
 }
 
 #endif  /* MICRO_LOGGER_TYPES_HPP */
