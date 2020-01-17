@@ -39,14 +39,6 @@ namespace uLog
 
     Result flush() final override;
 
-    Result enable() final override;
-
-    Result disable() final override;
-
-    Result setLogLevel( const Level level ) final override;
-
-    Level getLogLevel() final override;
-
     IOType getIOType() final override;
 
     Result log( const Level level, const void *const message, const size_t length ) final override;

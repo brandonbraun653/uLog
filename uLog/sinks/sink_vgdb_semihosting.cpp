@@ -50,29 +50,6 @@ namespace uLog
     return Result::RESULT_SUCCESS;
   }
 
-  Result VGDBSemihostingSink::enable()
-  {
-    enabled = true;
-    return Result::RESULT_SUCCESS;
-  }
-
-  Result VGDBSemihostingSink::disable()
-  {
-    enabled = false;
-    return Result::RESULT_SUCCESS;
-  }
-
-  Result VGDBSemihostingSink::setLogLevel( const Level level )
-  {
-    logLevel = level;
-    return Result::RESULT_SUCCESS;
-  }
-
-  Level VGDBSemihostingSink::getLogLevel()
-  {
-    return logLevel;
-  }
-
   IOType VGDBSemihostingSink::getIOType()
   {
     return IOType::VGDB_SINK;
