@@ -140,7 +140,7 @@ namespace uLog
     {
       auto result = Result::RESULT_LOCKED;
 
-      if ( Chimera::Threading::LockGuard( *this ).lock() )
+      if ( Chimera::Threading::TimedLockGuard( *this ).try_lock_for( 100 ) )
       {
         /*------------------------------------------------
         Until custom formatters are available, simply dump the thread name in there
