@@ -27,8 +27,6 @@ namespace uLog
 {
   VGDBSemihostingSink::VGDBSemihostingSink()
   {
-    enabled  = false;
-    logLevel = Level::LVL_MIN;
   }
 
   VGDBSemihostingSink::~VGDBSemihostingSink()
@@ -60,7 +58,7 @@ namespace uLog
     /*------------------------------------------------
     Check to see if we should even write
     ------------------------------------------------*/
-    if ( !enabled || ( level < logLevel ) || !message || !length )
+    if ( !isEnabled() || ( level < getLogLevel() ) || !message || !length )
     {
       return Result::RESULT_FAIL;
     }

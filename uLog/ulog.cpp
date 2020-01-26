@@ -17,7 +17,7 @@
 
 /* Chimera Includes */
 #include <Chimera/threading.hpp>
-#include <Chimera/types/threading_types.hpp>
+#include <Chimera/threading/types.hpp>
 
 /* uLog Includes */
 #include <uLog/config.hpp>
@@ -34,7 +34,7 @@ namespace uLog
   static std::array<SinkHandle, ULOG_MAX_REGISTERABLE_SINKS> sinkRegistry;
 
   static size_t defaultLockTimeout = 100;
-  static Chimera::Threading::RecursiveTimedMutex threadLock = nullptr;
+  static Chimera::Threading::RecursiveTimedMutex threadLock;
 
   /**
    *  Looks up the registry index associated with a particular sink handle
@@ -46,44 +46,34 @@ namespace uLog
 
   void initialize()
   {
-    using namespace Chimera::Threading;
+    Chimera::Threading::LockGuard x( threadLock );
 
-    if ( threadLock == nullptr )
-    {
-      threadLock = createSyncObject<RecursiveTimedMutex>();
-    }
-
-    if ( !uLogInitialized && lock( threadLock, defaultLockTimeout ) )
+    if ( !uLogInitialized )
     {
       sinkRegistry.fill( nullptr );
       uLogInitialized = true;
-      unlock( threadLock );
     }
   }
 
   Result setGlobalLogLevel( const Level level )
   {
-    if ( Chimera::Threading::lock( threadLock, defaultLockTimeout ) )
-    {
-      globalLogLevel = level;
-      Chimera::Threading::unlock( threadLock );
+    Chimera::Threading::LockGuard x( threadLock );
 
-      return Result::RESULT_SUCCESS;
-    }
-
-    return Result::RESULT_FAIL;
+    globalLogLevel = level;
+    return Result::RESULT_SUCCESS;
   }
 
   Result registerSink( SinkHandle &sink, const uLog::Config options )
   {
     constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
-
+    
+    Chimera::Threading::TimedLockGuard x( threadLock );
     size_t nullIndex      = invalidIndex;           /* First index that doesn't have a sink registered */
     bool sinkIsRegistered = false;                  /* Indicates if the sink we are registering already exists */
     bool registryIsFull   = true;                   /* Is the registry full of sinks? */
     auto result           = Result::RESULT_SUCCESS; /* Function return code */
 
-    if ( Chimera::Threading::lock( threadLock, defaultLockTimeout ) )
+    if ( x.try_lock_for( defaultLockTimeout ) )
     {
       /*------------------------------------------------
       Check if the sink already is registered as well as
@@ -126,8 +116,6 @@ namespace uLog
           sinkRegistry[ nullIndex ] = sink;
         }
       }
-
-      Chimera::Threading::unlock( threadLock );
     }
 
     return result;
@@ -136,8 +124,9 @@ namespace uLog
   Result removeSink( SinkHandle &sink )
   {
     Result result = Result::RESULT_LOCKED;
+    Chimera::Threading::TimedLockGuard x( threadLock );
 
-    if ( Chimera::Threading::lock( threadLock, defaultLockTimeout ) )
+    if ( x.try_lock_for( defaultLockTimeout ) )
     {
       auto index = getSinkOffsetIndex( sink );
       if ( index < sinkRegistry.size() )
@@ -162,8 +151,6 @@ namespace uLog
 
         result = Result::RESULT_SUCCESS;
       }
-
-      Chimera::Threading::unlock( threadLock );
     }
 
     return result;
@@ -172,11 +159,11 @@ namespace uLog
   Result setRootSink( SinkHandle &sink )
   {
     Result result = Result::RESULT_LOCKED;
+    Chimera::Threading::TimedLockGuard x( threadLock );
 
-    if ( Chimera::Threading::lock( threadLock, defaultLockTimeout ) )
+    if ( x.try_lock_for( defaultLockTimeout ) )
     {
       globalRootSink = sink;
-      Chimera::Threading::unlock( threadLock );
       result = Result::RESULT_SUCCESS;
     }
 
@@ -223,13 +210,13 @@ namespace uLog
     /*------------------------------------------------
     Input boundary checking
     ------------------------------------------------*/
-    if ( !Chimera::Threading::lock( threadLock, defaultLockTimeout ) )
+    Chimera::Threading::TimedLockGuard x( threadLock );
+    if ( !x.try_lock_for( defaultLockTimeout ) )
     {
       return Result::RESULT_LOCKED;
     }
     else if ( ( level < globalLogLevel ) || !message || !length )
     {
-      Chimera::Threading::unlock( threadLock );
       return Result::RESULT_FAIL;
     }
 
@@ -245,7 +232,6 @@ namespace uLog
       }
     }
 
-    Chimera::Threading::unlock( threadLock );
     return Result::RESULT_SUCCESS;
   }
 
