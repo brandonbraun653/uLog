@@ -5,7 +5,7 @@
  *   Description:
  *    Visual GDB ARM Semihosting Sink
  *
- *   2019 | Brandon Braun | brandonbraun653@gmail.com
+ *   2019-2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -15,7 +15,7 @@
 /*------------------------------------------------
 Visual GDB framework file that supports Semihosting
 ------------------------------------------------*/
-#if __has_include( "FastSemihosting.cpp" )
+#if defined( USING_VISUAL_GDB )
 #define MICRO_LOGGER_HAS_VGDB_SEMIHOSTING   ( 1 )
 
 /* C++ Includes */
