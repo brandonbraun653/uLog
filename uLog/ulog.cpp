@@ -5,7 +5,7 @@
  *  Description:
  *    uLog implementation
  *
- *  2019 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 /* C++ Includes */
@@ -16,8 +16,7 @@
 #include <string>
 
 /* Chimera Includes */
-#include <Chimera/threading.hpp>
-#include <Chimera/threading/types.hpp>
+#include <Chimera/thread>
 
 /* uLog Includes */
 #include <uLog/config.hpp>
