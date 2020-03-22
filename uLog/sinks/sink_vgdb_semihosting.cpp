@@ -10,7 +10,7 @@
  *  Links:
  *    https://visualgdb.com/tutorials/arm/semihosting/
  *
- *  2019 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 /* uLog Includes */
@@ -18,7 +18,12 @@
 
 #if defined( MICRO_LOGGER_HAS_VGDB_SEMIHOSTING ) && ( MICRO_LOGGER_HAS_VGDB_SEMIHOSTING == 1 )
 
-extern int WriteToFastSemihostingChannel( unsigned char channel, const void *pBuffer, int size, int writeAll );
+/**
+ *  Function defined by the VGDB FastSemihosting Package. 
+ */
+extern "C" {
+int WriteToFastSemihostingChannel( unsigned char channel, const void *pBuffer, int size, int writeAll );
+}
 
 static constexpr unsigned char DefaultChannel = 1;    // Found by enabling printf redirects and then manually inspecting
 static constexpr int DefaultWriteMode         = 1;    // This is equivalent to FAST_SEMIHOSTING_BLOCKING_MODE
