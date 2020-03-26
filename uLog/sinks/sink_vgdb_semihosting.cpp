@@ -21,7 +21,10 @@
 /**
  *  Function defined by the VGDB FastSemihosting Package. 
  */
-int WriteToFastSemihostingChannel( unsigned char channel, const void *pBuffer, int size, int writeAll );
+extern "C"
+{
+  int WriteToFastSemihostingChannel( unsigned char channel, const void *pBuffer, int size, int writeAll );
+}
 
 static constexpr unsigned char DefaultChannel = 1;    // Found by enabling printf redirects and then manually inspecting
 static constexpr int DefaultWriteMode         = 1;    // This is equivalent to FAST_SEMIHOSTING_BLOCKING_MODE
