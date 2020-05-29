@@ -1,0 +1,48 @@
+# ====================================================
+# Local Rules
+# ====================================================
+local rule explicit_alias ( name : sources * : requirements * : default-build * : usage-requirements * )
+    {
+    alias $(name) : $(sources) : $(requirements) : $(default-build) : $(usage-requirements) ;
+    explicit $(name) ;
+    }
+
+# ====================================================
+# Local Resources
+# ====================================================
+# ------------------------------------------
+# Source/Include Directories
+# ------------------------------------------
+local ulog_inc_dir = . ; # Expects the user to reference headers like <Chimera/some_file.hpp>
+
+# ------------------------------------------
+# Source Files
+# ------------------------------------------
+
+# ====================================================
+# Project Definition
+# ====================================================
+project uLog : usage-requirements <include>$(ulog_inc_dir) ;
+
+
+# ====================================================
+# Public Targets
+# ====================================================
+# ------------------------------------------
+# Includes all common RF24 headers
+# -----------------------------------------
+alias PUB
+  :
+  :
+  :
+  : <include>$(ulog_inc_dir)
+  ;
+explicit PUB ;
+
+# ====================================================
+# Private Targets
+# ====================================================
+
+explicit_alias TEST_COMPILE
+    :
+    ;
