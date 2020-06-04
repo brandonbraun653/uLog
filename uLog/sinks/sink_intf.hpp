@@ -16,6 +16,7 @@
 #include <array>
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <string>
 #include <string_view>
 
@@ -51,16 +52,16 @@ namespace uLog
 
     /**
      *  Provides the core functionality of the sink by logging messages.
-     *  
+     *
      *  @note   Assume the memory can be modified/destroyed after return
-     *  
+     *
      *  @param[in]  level     The log level the message was sent at
      *  @param[in]  message   The message to be logged. Can be any kind of data
      *  @param[in]  length    How large the message is in bytes
      *  @return ResultType    Whether or not the logging action succeeded
      */
     virtual Result log( const Level level, const void *const message, const size_t length ) = 0;
-    
+
     /**
      *  Enables the sink so logs can be processed
      */
@@ -87,8 +88,8 @@ namespace uLog
     }
 
     /**
-     *  Sets the minimum log level threshold. This level, plus any higher priority 
-     *  levels, will be logged with the sink. 
+     *  Sets the minimum log level threshold. This level, plus any higher priority
+     *  levels, will be logged with the sink.
      *
      *  @param[in]  level   The minimum log level for this sink
      *  @return ResultType
@@ -98,7 +99,7 @@ namespace uLog
       mLoggingLevel = level;
     }
 
-    /** 
+    /**
      *  Gets the log level currently assigned to the sink
      *
      *  @return Level
@@ -133,7 +134,7 @@ namespace uLog
     }
 
     /**
-     *  
+     *
      */
     template<typename... Args>
     Result flog( const Level lvl, const char *str, Args const &... args )

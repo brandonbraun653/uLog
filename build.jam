@@ -39,10 +39,21 @@ alias PUB
   ;
 explicit PUB ;
 
+lib LIB
+  : [ glob uLog/*.cpp ]
+    [ glob uLog/sinks/*.cpp ]
+
+  : <link>static
+    <use>PUB
+    <use>/CHIMERA//PUB
+    <use>/PRJ//TARGET_OPTIONS
+  ;
+explicit LIB ;
+
 # ====================================================
 # Private Targets
 # ====================================================
 
 explicit_alias TEST_COMPILE
-    :
+    : LIB
     ;
