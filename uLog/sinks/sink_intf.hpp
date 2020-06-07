@@ -139,26 +139,27 @@ namespace uLog
     template<typename... Args>
     Result flog( const Level lvl, const char *str, Args const &... args )
     {
-      auto result = Result::RESULT_LOCKED;
+      auto result = Result::RESULT_SUCCESS;
+      this->lock();
 
-      if ( Chimera::Threading::TimedLockGuard( *this ).try_lock_for( 100 ) )
+      /*------------------------------------------------
+      Until custom formatters are available, simply dump the thread name in there
+      ------------------------------------------------*/
+      int bytesWritten = snprintf( mLogBuffer.data(), mLogBuffer.size(), "[%s] -- ", mName.data() );
+
+      if ( bytesWritten < 0 )
       {
-        /*------------------------------------------------
-        Until custom formatters are available, simply dump the thread name in there
-        ------------------------------------------------*/
-        int bytesWritten = snprintf( mLogBuffer.data(), mLogBuffer.size(), "[%s] -- ", mName.data() );
-
-        if ( bytesWritten < 0 )
-        {
-          return Result::RESULT_FAIL;
-        }
-
-        /*------------------------------------------------
-        Attach the user's message, or what will fit anyways
-        ------------------------------------------------*/
-        snprintf( mLogBuffer.data() + bytesWritten, mLogBuffer.size() - bytesWritten, str, args... );
-        result = log( lvl, mLogBuffer.data(), strlen( mLogBuffer.data() ) );
+        this->unlock();
+        return Result::RESULT_FAIL;
       }
+
+      /*------------------------------------------------
+      Attach the user's message, or what will fit anyways
+      ------------------------------------------------*/
+      snprintf( mLogBuffer.data() + bytesWritten, mLogBuffer.size() - bytesWritten, str, args... );
+      result = log( lvl, mLogBuffer.data(), strlen( mLogBuffer.data() ) );
+
+      this->unlock();
 
       return result;
     }
