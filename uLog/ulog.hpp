@@ -21,39 +21,39 @@
 /* uLog Includes */
 #include <uLog/config.hpp>
 #include <uLog/types.hpp>
-
+#include <uLog/sinks/sink_intf.hpp>
 
 namespace uLog
 {
   /**
    *  Initializes the backend driver
-   *  
+   *
    *  @return void
    */
   void initialize();
 
   /**
-   *  Sets a minimum log level that is needed to emit messages 
+   *  Sets a minimum log level that is needed to emit messages
    *  to registered sinks
-   *  
+   *
    *  @param[in]  level      The global log level to be set
    *  @return SinkHandleType
    */
   Result setGlobalLogLevel( const Level level );
 
   /**
-   *  Registers a sink with the back end driver 
-   *  
+   *  Registers a sink with the back end driver
+   *
    *  @param[in]  sink      The sink to be registered
    *  @return SinkHandleType
    */
   Result registerSink( SinkHandle &sink, const uLog::Config options = CFG_NONE );
 
   /**
-   *  Removes the associated sink. 
-   *  
+   *  Removes the associated sink.
+   *
    *  @note If nullptr is passed in, all sinks are removed.
-   *  
+   *
    *  @param[in]  sink      The sink that should be removed
    *  @return ResultType
    */
@@ -68,7 +68,7 @@ namespace uLog
   Result setRootSink( SinkHandle &sink );
 
   /**
-   *  Gets the default global logger instance 
+   *  Gets the default global logger instance
    *
    *  @return SinkHandle
    */
@@ -79,7 +79,7 @@ namespace uLog
    *  should be logged with them depending on the sink specific logging level.
    *
    *  @param[in]  lvl       The severity level of the message to be logged
-   *  @param[in]  msg       Raw byte message to be logged 
+   *  @param[in]  msg       Raw byte message to be logged
    *  @param[in]  length    Length of the log message
    *  @return Result
    */
