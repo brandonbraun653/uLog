@@ -5,7 +5,7 @@
  *  Description:
  *    Implements a sink for std::cout
  *
- *  2019 | Brandon Braun | brandonbraun653@gmail.com
+ *  2019-2020 | Brandon Braun | brandonbraun653@gmail.com
  ********************************************************************************/
 
 #pragma once
@@ -22,18 +22,15 @@
 namespace uLog
 {
   class CoutSink : public SinkInterface
-  {public:
+  {
+  public:
     CoutSink();
     ~CoutSink();
 
     Result open() final override;
-
     Result close() final override;
-
     Result flush() final override;
-
     IOType getIOType() final override;
-
     Result log( const Level level, const void *const message, const size_t length ) final override;
   };
 }    // namespace uLog
