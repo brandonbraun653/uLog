@@ -25,6 +25,7 @@ function(build_library variant)
   add_library(${LIB} STATIC
     uLog/ulog.cpp
     uLog/sinks/sink_cout.cpp
+    uLog/sinks/sink_intf.cpp
   )
   target_link_libraries(${LIB} PRIVATE ${LINK_LIBS} prj_build_target${variant} prj_device_target)
   export(TARGETS ${LIB} FILE "${PROJECT_BINARY_DIR}/uLog/${LIB}.cmake")

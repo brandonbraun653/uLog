@@ -32,13 +32,7 @@ namespace uLog
   class SinkInterface : public Chimera::Threading::LockableCRTP<SinkInterface>
   {
   public:
-    SinkInterface()
-    {
-      mSinkEnabled  = false;
-      mLoggingLevel = Level::LVL_MAX;
-      mName         = "";
-      mLogBuffer.fill( 0 );
-    }
+    SinkInterface();
 
     virtual ~SinkInterface() = default;
 
