@@ -133,6 +133,10 @@ namespace uLog
     template<typename... Args>
     Result flog( const Level lvl, const char *str, Args const &... args )
     {
+      /*-------------------------------------------------
+      Note to future me: If 'this' is null, you haven't
+      initialized the sink yet.
+      -------------------------------------------------*/
       auto result = Result::RESULT_SUCCESS;
       this->lock();
 
