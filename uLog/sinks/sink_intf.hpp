@@ -29,7 +29,7 @@
 
 namespace uLog
 {
-  class SinkInterface : public Chimera::Threading::LockableCRTP<SinkInterface>
+  class SinkInterface : public Chimera::Threading::Lockable<SinkInterface>
   {
   public:
     SinkInterface();
@@ -163,8 +163,8 @@ namespace uLog
     }
 
   private:
-    friend Chimera::Threading::LockableCRTP<SinkInterface>;
-    Chimera::Threading::RecursiveTimedMutex mClsMutex;
+    friend Chimera::Threading::Lockable<SinkInterface>;
+
 
     Level mLoggingLevel;
     bool mSinkEnabled;
