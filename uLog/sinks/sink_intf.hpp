@@ -29,7 +29,7 @@
 
 namespace uLog
 {
-  class SinkInterface : public Chimera::Threading::Lockable<SinkInterface>
+  class SinkInterface : public Chimera::Thread::Lockable<SinkInterface>
   {
   public:
     SinkInterface();
@@ -163,7 +163,7 @@ namespace uLog
     }
 
   private:
-    friend Chimera::Threading::Lockable<SinkInterface>;
+    friend Chimera::Thread::Lockable<SinkInterface>;
 
 
     Level mLoggingLevel;

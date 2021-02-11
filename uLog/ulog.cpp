@@ -33,7 +33,7 @@ namespace uLog
   static std::array<SinkHandle, ULOG_MAX_REGISTERABLE_SINKS> sinkRegistry;
 
   static size_t defaultLockTimeout = 100;
-  static Chimera::Threading::RecursiveTimedMutex threadLock;
+  static Chimera::Thread::RecursiveTimedMutex threadLock;
 
   /**
    *  Looks up the registry index associated with a particular sink handle
@@ -45,7 +45,7 @@ namespace uLog
 
   void initialize()
   {
-    Chimera::Threading::LockGuard x( threadLock );
+    Chimera::Thread::LockGuard x( threadLock );
 
     if ( !uLogInitialized )
     {
@@ -56,7 +56,7 @@ namespace uLog
 
   Result setGlobalLogLevel( const Level level )
   {
-    Chimera::Threading::LockGuard x( threadLock );
+    Chimera::Thread::LockGuard x( threadLock );
 
     globalLogLevel = level;
     return Result::RESULT_SUCCESS;
@@ -65,8 +65,8 @@ namespace uLog
   Result registerSink( SinkHandle &sink, const uLog::Config options )
   {
     constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
-    
-    Chimera::Threading::TimedLockGuard x( threadLock );
+
+    Chimera::Thread::TimedLockGuard x( threadLock );
     size_t nullIndex      = invalidIndex;           /* First index that doesn't have a sink registered */
     bool sinkIsRegistered = false;                  /* Indicates if the sink we are registering already exists */
     bool registryIsFull   = true;                   /* Is the registry full of sinks? */
@@ -123,7 +123,7 @@ namespace uLog
   Result removeSink( SinkHandle &sink )
   {
     Result result = Result::RESULT_LOCKED;
-    Chimera::Threading::TimedLockGuard x( threadLock );
+    Chimera::Thread::TimedLockGuard x( threadLock );
 
     if ( x.try_lock_for( defaultLockTimeout ) )
     {
@@ -158,7 +158,7 @@ namespace uLog
   Result setRootSink( SinkHandle &sink )
   {
     Result result = Result::RESULT_LOCKED;
-    Chimera::Threading::TimedLockGuard x( threadLock );
+    Chimera::Thread::TimedLockGuard x( threadLock );
 
     if ( x.try_lock_for( defaultLockTimeout ) )
     {
@@ -209,7 +209,7 @@ namespace uLog
     /*------------------------------------------------
     Input boundary checking
     ------------------------------------------------*/
-    Chimera::Threading::TimedLockGuard x( threadLock );
+    Chimera::Thread::TimedLockGuard x( threadLock );
     if ( !x.try_lock_for( defaultLockTimeout ) )
     {
       return Result::RESULT_LOCKED;
